@@ -1,0 +1,41 @@
+name: Backend CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/backend.yml']
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/backend.yml']
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore backend/CriticalViewer.sln
+
+      # Required check per the engineering standards: a PR cannot be
+      # approved if lint has issues. Configure this job as a required
+      # status check under the repo's branch protection rules for main.
+      - name: Lint (dotnet format)
+        run: dotnet format backend/CriticalViewer.sln --verify-no-changes
+
+      # Required check per the engineering standards: a PR cannot be
+      # approved if the unit test suite has issues.
+      - name: Test
+        run: dotnet test backend/CriticalViewer.sln --configuration Release --no-restore
+
+  # No deploy job here (yet). The real target is AWS Lightsail Container
+  # Service (cost-driven decision - see docs/progress/2026-08-26.md), not
+  # the ECR/ECS setup this job used to push to; that infra
+  # (infra/terraform/) has been removed since it didn't reflect reality.
+  # Deploys currently happen by hand via `aws lightsail push-container-image`
+  # + `create-container-service-deployment` - wiring that into CI is a
+  # follow-up, not done yet.

@@ -1,0 +1,24 @@
+<svg viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#120a08"/>
+      <stop offset="55%" stop-color="#2a1410"/>
+      <stop offset="100%" stop-color="#7a2c12"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="88%" r="55%">
+      <stop offset="0%" stop-color="#ffb347" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#e2531d" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#e2531d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#bg)"/>
+  <rect width="400" height="600" fill="url(#glow)"/>
+  <polygon points="0,600 60,430 110,600" fill="#1a0d09" opacity="0.85"/>
+  <polygon points="80,600 160,380 230,600" fill="#160b08" opacity="0.85"/>
+  <polygon points="210,600 290,440 400,600" fill="#1a0d09" opacity="0.85"/>
+  <path d="M195 470 C170 430 178 400 200 375 C190 405 210 415 210 440 C222 420 222 400 210 385 C232 405 235 435 215 460 C225 450 228 440 226 430 C232 450 222 468 195 470 Z" fill="#ffb347"/>
+  <path d="M198 465 C185 445 190 428 202 415 C198 432 210 438 210 450 C222 435 216 420 210 412 C226 425 226 445 210 458 C205 450 200 460 198 465 Z" fill="#ffe1a8"/>
+  <text x="200" y="140" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="40" fill="#f5e6d8" letter-spacing="1">The Last</text>
+  <text x="200" y="188" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="40" fill="#f5e6d8" letter-spacing="1">Ember</text>
+  <text x="200" y="222" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#e8b98a">Some fires are worth keeping.</text>
+</svg>

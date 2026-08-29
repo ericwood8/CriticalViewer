@@ -1,0 +1,146 @@
+services:
+  # Container 1: The Database
+  # Docker Official Image (co-maintained by Docker + the MySQL/Oracle
+  # team) - the direct equivalent of using a vendor-maintained image, same
+  # reasoning as mcr.microsoft.com/mssql/server before this migration.
+  # 8.4 is the current LTS release under MySQL's versioning scheme.
+  # MYSQL_DATABASE auto-creates the CriticalViewer database on first boot.
+  database:
+    image: mysql:8.4
+    container_name: mysql_dev
+    environment:
+      - MYSQL_ROOT_PASSWORD=YourStrongPassword123!
+      - MYSQL_DATABASE=CriticalViewer
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # One-shot: seeds/updates the schema by running the same SQL script you'd
+  # run by hand. Idempotent (every CREATE/INSERT in the script is guarded),
+  # so it's safe to run on every `docker compose up`. Reuses the MySQL
+  # image purely for its bundled `mysql` CLI client - it never runs mysqld.
+  db_seed:
+    image: mysql:8.4
+    container_name: mysql_seed
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - ./backend/src/CriticalViewer.Infrastructure/Migrations/CriticalViewerDB.sql:/seed/CriticalViewerDB.sql:ro
+    environment:
+      - MYSQL_ROOT_PASSWORD=YourStrongPassword123!
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >
+        mysql -h database -uroot -p"$$MYSQL_ROOT_PASSWORD" CriticalViewer < /seed/CriticalViewerDB.sql
+    restart: "no"
+
+  # Container 2: Your ASP.NET Back-end API
+  # No host port published - only the proxy container is reachable from
+  # the host, matching Lightsail Container Service's one-public-endpoint
+  # constraint exactly (see nginx/nginx.conf and docs/progress/2026-08-27.md
+  # for why). Reach it at http://localhost:8081/api/... through the proxy.
+  backend-api:
+    image: my-aspnet-api:local
+    container_name: aspnet_backend_api
+    build:
+      context: ./backend # Path to your back-end folder
+      dockerfile: Dockerfile
+    environment:
+      # Without this the container defaults to Production: Program.cs
+      # then skips Swagger UI entirely and calls UseHttpsRedirection(),
+      # which breaks plain-http calls since this container has no HTTPS
+      # cert configured. This compose file is a local dev tool, so
+      # Development is the correct value here - not for a real deploy.
+      - ASPNETCORE_ENVIRONMENT=Development
+      # MySQL has no Windows Integrated Auth equivalent - username/password
+      # is the only option, in every environment, not just containers.
+      - ConnectionStrings__DefaultConnection=Server=database;Port=3306;Database=CriticalViewer;User=root;Password=YourStrongPassword123!;
+      # Was "AllowedCorsOrigins__0", which doesn't match any real config
+      # key (Program.cs reads "Cors:AllowedOrigins"), so it was a no-op.
+      - Cors__AllowedOrigins__0=http://localhost:5173
+      - Cors__AllowedOrigins__1=http://localhost:3000
+      # user-secrets (used for local `dotnet run`) don't exist inside a
+      # container - without this, the API falls back to a random signing
+      # key every restart and every previously issued token stops
+      # validating. Replace with a real secret before this ever runs
+      # anywhere but a throwaway local environment.
+      - Jwt__SigningKey=dev-only-docker-compose-signing-key-change-me
+    depends_on:
+      database:
+        condition: service_healthy
+      db_seed:
+        condition: service_completed_successfully
+
+  # Container 3: Your React Front-end UI
+  # Dev-mode container: runs the Vite dev server with hot reload against a
+  # bind-mounted source tree (see volumes below) - meant for local dev,
+  # not as a production image (no minification, source maps on, slower
+  # startup). Note this is the same my-react-ui:local image currently
+  # being pushed to Lightsail Container Service for early testing; a real
+  # launch should replace it with a production build (`vite build` output
+  # served by something like nginx) before this matters for real traffic.
+  # No host port published here either - same reasoning as backend-api,
+  # reach it at http://localhost:8081 through the proxy.
+  frontend-ui:
+    image: my-react-ui:local
+    container_name: react_frontend_ui
+    build:
+      context: ./frontend # Path to your front-end folder
+      dockerfile: Dockerfile
+    environment:
+      # Empty on purpose: the proxy serves the SPA and the API from the
+      # same origin, so a relative path (client.ts's API_BASE_URL falls
+      # back to this being "" and just uses `${path}` as-is) reaches
+      # /api/... on that same origin - no cross-origin request, no CORS
+      # needed for real traffic. See nginx/nginx.conf.
+      - VITE_API_BASE_URL=
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # anonymous volume: keeps the container's own
+        # node_modules (installed for Linux) instead of the host's bind
+        # mount shadowing it with a Windows-built one.
+    depends_on:
+      - backend-api
+
+  # Container 4: reverse proxy - the ONLY container published to the host,
+  # deliberately mirroring Lightsail Container Service's one-public-
+  # endpoint-per-deployment constraint so what's tested locally matches
+  # what actually ships. See nginx/templates/default.conf.template for
+  # the routing.
+  proxy:
+    image: my-nginx-proxy:local
+    container_name: nginx_proxy
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    environment:
+      # Opt-in flag the official image's own 15-local-resolvers.envsh
+      # checks before it'll export $NGINX_LOCAL_RESOLVERS at all - without
+      # this, that script silently no-ops and the template's
+      # ${NGINX_LOCAL_RESOLVERS} substitution never happens.
+      - NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+      # Compose gives each service its own per-service DNS name on the
+      # shared bridge network - NOT the same as Lightsail, which uses
+      # localhost instead (see the template's own comments for why).
+      - BACKEND_API_UPSTREAM=backend-api:8080
+      - FRONTEND_UI_UPSTREAM=frontend-ui:5173
+    ports:
+      - "8081:80" # http://localhost:8081 is now the one address for the whole app
+    depends_on:
+      - backend-api
+      - frontend-ui
+
+volumes:
+  mysql_data:

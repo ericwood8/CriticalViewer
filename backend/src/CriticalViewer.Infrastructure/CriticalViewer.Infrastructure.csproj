@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>CriticalViewer.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Community fork of Pomelo.EntityFrameworkCore.MySql, tracking .NET's
+         release cycle closely - upstream Pomelo hasn't cut an EF Core 10
+         release yet. Same API surface (same source lineage), so swapping
+         back to the official package later should be low-friction if/when
+         it catches up. See github.com/microting/Pomelo.EntityFrameworkCore.MySql -->
+    <PackageReference Include="Microting.EntityFrameworkCore.MySql" Version="10.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CriticalViewer.Core\CriticalViewer.Core.csproj" />
+  </ItemGroup>
+
+</Project>

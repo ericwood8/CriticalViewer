@@ -1,0 +1,14 @@
+# Used by `dotnet format` in CI (see .github/workflows/backend.yml).
+# Keep this minimal and let the team layer on real preferences as they
+# come up in review, rather than guessing a large ruleset up front.
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+charset = utf-8
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2

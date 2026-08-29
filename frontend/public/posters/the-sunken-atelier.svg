@@ -1,0 +1,27 @@
+<svg viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#062b30"/>
+      <stop offset="55%" stop-color="#0b4a52"/>
+      <stop offset="100%" stop-color="#12777f"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bdf2e8" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#bdf2e8" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#bg)"/>
+  <path d="M140 470 L140 300 Q140 230 200 230 Q260 230 260 300 L260 470 Z" fill="none" stroke="url(#glass)" stroke-width="6"/>
+  <path d="M160 470 L160 305 Q160 255 200 255 Q240 255 240 305 L240 470 Z" fill="#0b4a52" opacity="0.4"/>
+  <g fill="#bdf2e8" opacity="0.6">
+    <circle cx="90" cy="480" r="5"/>
+    <circle cx="110" cy="420" r="3"/>
+    <circle cx="80" cy="350" r="4"/>
+    <circle cx="310" cy="500" r="4"/>
+    <circle cx="300" cy="430" r="3"/>
+    <circle cx="320" cy="360" r="5"/>
+  </g>
+  <text x="200" y="140" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#eafffb" letter-spacing="1">The Sunken</text>
+  <text x="200" y="180" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#eafffb" letter-spacing="1">Atelier</text>
+  <text x="200" y="212" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="14" fill="#a9e8de">Not every door leads home.</text>
+</svg>

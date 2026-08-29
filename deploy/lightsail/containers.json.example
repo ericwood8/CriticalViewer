@@ -1,0 +1,33 @@
+{
+  "proxy": {
+    "image": ":container-service-1.my-nginx-proxy.9",
+    "ports": {
+      "80": "HTTP"
+    },
+    "environment": {
+      "NGINX_ENTRYPOINT_LOCAL_RESOLVERS": "1",
+      "BACKEND_API_UPSTREAM": "localhost:8080",
+      "FRONTEND_UI_UPSTREAM": "localhost:5173"
+    }
+  },
+  "backend-api": {
+    "image": ":container-service-1.my-aspnet-api.4",
+    "ports": {
+      "8080": "HTTP"
+    },
+    "environment": {
+      "ASPNETCORE_ENVIRONMENT": "Development",
+      "ConnectionStrings__DefaultConnection": "Server=ls-15a7d614ebcce644bd998e89e226cb302a6e92b6.c168yyciugse.us-east-2.rds.amazonaws.com;Port=3306;Database=CriticalViewer;User=criticalviewer_app;Password=REPLACE_ME_BEFORE_DEPLOYING;",
+      "Jwt__SigningKey": "REPLACE_ME_BEFORE_DEPLOYING_a_real_random_signing_key"
+    }
+  },
+  "frontend-ui": {
+    "image": ":container-service-1.my-react-ui.10",
+    "ports": {
+      "5173": "HTTP"
+    },
+    "environment": {
+      "VITE_API_BASE_URL": ""
+    }
+  }
+}

@@ -1,0 +1,49 @@
+name: Frontend CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['frontend/**', '.github/workflows/frontend.yml']
+  push:
+    branches: [main]
+    paths: ['frontend/**', '.github/workflows/frontend.yml']
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      # Required check per the engineering standards: a PR cannot be
+      # approved if lint has issues.
+      - name: Lint
+        run: npm run lint
+
+      # Required check per the engineering standards: a PR cannot be
+      # approved if the unit test suite has issues.
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # No deploy job here (yet). The real target is AWS Lightsail Container
+  # Service (cost-driven decision - see docs/progress/2026-08-26.md), not
+  # the S3/CloudFront setup this job used to sync to; that infra
+  # (infra/terraform/) has been removed since it didn't reflect reality -
+  # the frontend now ships as a Lightsail container (my-react-ui), not a
+  # static site. Deploys currently happen by hand via `aws lightsail
+  # push-container-image` + `create-container-service-deployment` -
+  # wiring that into CI is a follow-up, not done yet.

@@ -1,0 +1,97 @@
+# Single public-facing entry point, fronting both backend-api and
+# frontend-ui over whatever network they share with this container.
+# Exists specifically because Lightsail Container Service only allows one
+# publicly-reachable container per deployment - see
+# docs/progress/2026-08-27.md.
+#
+# Side benefit: since the SPA and the API are now served from the same
+# origin (through this proxy), browser calls from the SPA to /api/* are
+# same-origin - no CORS needed for real traffic.
+#
+# This file is a *template* (see nginx/Dockerfile - it's copied to
+# /etc/nginx/templates/, not straight to conf.d), substituted by the
+# official nginx image's own envsubst entrypoint step, for two things
+# that differ between Docker Compose (local) and Lightsail Container
+# Service (real deploy) and can't be hardcoded to work in both:
+#
+# 1. ${BACKEND_API_UPSTREAM} / ${FRONTEND_UI_UPSTREAM} - where to find
+#    the other two containers. Docker Compose gives each service its own
+#    per-service DNS name on a shared bridge network (backend-api:8080),
+#    but Lightsail runs every container in one deployment inside a single
+#    shared network namespace, pod-style - there is no per-container DNS
+#    name there at all, only localhost:8080. Confirmed by hitting exactly
+#    this failure for real: nginx returned "backend-api could not be
+#    resolved (3: Host not found)" on every single request once deployed,
+#    not just at startup. Set via each environment's own container
+#    definition (docker-compose.yml here, containers.json.example for
+#    Lightsail) rather than hardcoded here.
+#
+# 2. ${NGINX_LOCAL_RESOLVERS} - needed because `set $var; proxy_pass
+#    http://$var;` (rather than a bare literal target) makes nginx
+#    resolve each upstream lazily, per-request, instead of once at
+#    startup. That still matters even under the localhost model above:
+#    Lightsail has no equivalent to Compose's `depends_on`, so containers
+#    start in parallel, and a bare literal proxy_pass target crashes
+#    nginx outright if resolution fails even once at startup (which is
+#    exactly what happened before this was a variable - "host not found"
+#    at boot, before the localhost issue was even found). With a
+#    variable, nginx starts fine regardless of the other containers'
+#    state and just resolves/retries per request. $NGINX_LOCAL_RESOLVERS
+#    is set by the image's own 15-local-resolvers.envsh (runs just before
+#    this template is processed) from whatever /etc/resolv.conf says -
+#    works unmodified in both environments without hardcoding either
+#    one's resolver address. Requires NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+#    to be set on the container, or that script silently no-ops.
+#
+# The envsubst step this image runs only substitutes names that are
+# actual environment variables, so nginx's own $-prefixed variables below
+# ($host, $remote_addr, $http_upgrade, $backend_api, $frontend_ui, etc.)
+# are left alone - only the ${...} names above get replaced.
+
+resolver ${NGINX_LOCAL_RESOLVERS} valid=10s;
+
+server {
+    listen 80;
+
+    # No trailing slash after the port on either proxy_pass target: that
+    # means "forward the original request URI unchanged" rather than
+    # nginx's usual location-prefix-replacement behavior. Both backend
+    # routes (/api/...) and Vite's asset paths (/, /src/..., /@vite/...)
+    # expect the full path exactly as the browser requested it. This
+    # still holds true with a variable target, as used here.
+
+    location /api/ {
+        set $backend_api ${BACKEND_API_UPSTREAM};
+        proxy_pass http://$backend_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Swagger UI - handy to keep reachable through the same public URL
+    # for poking at the API directly.
+    location /swagger {
+        set $backend_api ${BACKEND_API_UPSTREAM};
+        proxy_pass http://$backend_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        set $frontend_ui ${FRONTEND_UI_UPSTREAM};
+        proxy_pass http://$frontend_ui;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # Vite's dev server needs a websocket connection for hot module
+        # reload - without this upgrade, HMR silently fails (page still
+        # loads, but edits stop live-reloading).
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}

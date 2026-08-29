@@ -1,0 +1,35 @@
+<svg viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#241a42"/>
+      <stop offset="60%" stop-color="#3d2c66"/>
+      <stop offset="100%" stop-color="#6a4f9c"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#bg)"/>
+  <g fill="#f5efe0">
+    <circle cx="60" cy="90" r="2"/>
+    <circle cx="330" cy="60" r="2.5"/>
+    <circle cx="280" cy="130" r="1.5"/>
+    <circle cx="40" cy="220" r="1.5"/>
+    <circle cx="360" cy="200" r="2"/>
+    <circle cx="100" cy="150" r="1.5"/>
+  </g>
+  <polygon points="200,230 250,270 235,325 165,325 150,270" fill="#f2e9d0"/>
+  <polygon points="200,230 250,270 200,300" fill="#e2d3ab"/>
+  <polygon points="150,270 200,300 165,325" fill="#d8c69a"/>
+  <polygon points="235,325 200,300 250,270" fill="#ecdfbb"/>
+  <line x1="200" y1="230" x2="200" y2="300" stroke="#c9b688" stroke-width="1"/>
+  <line x1="150" y1="270" x2="235" y2="325" stroke="#c9b688" stroke-width="1"/>
+  <line x1="250" y1="270" x2="165" y2="325" stroke="#c9b688" stroke-width="1"/>
+  <g fill="#f2e9d0">
+    <polygon points="90,420 115,400 130,420 115,445"/>
+    <polygon points="90,420 115,420 100,410"/>
+  </g>
+  <g fill="#f2e9d0">
+    <polygon points="290,450 315,430 330,450 315,475"/>
+    <polygon points="290,450 315,450 300,440"/>
+  </g>
+  <text x="200" y="110" text-anchor="middle" font-family="'Comic Sans MS', 'Trebuchet MS', sans-serif" font-size="40" fill="#f7f2e6" letter-spacing="1">Paper Moons</text>
+  <text x="200" y="500" text-anchor="middle" font-family="'Trebuchet MS', sans-serif" font-size="15" fill="#d8cdee">Fold your own fate.</text>
+</svg>

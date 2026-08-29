@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Lightsail deployment secrets - deploy/lightsail/containers.json holds
+# the real DB password and JWT signing key once filled in; only the
+# placeholder-only .example version is meant to be committed.
+deploy/lightsail/containers.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp

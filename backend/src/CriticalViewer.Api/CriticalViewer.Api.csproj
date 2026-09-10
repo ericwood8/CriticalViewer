@@ -9,6 +9,7 @@
          negotiate collation with SQL Server - invariant mode makes every
          DB connection throw NotSupportedException at TryOpen. -->
     <InvariantGlobalization>false</InvariantGlobalization>
+    <UserSecretsId>4175cd3b-f893-4be5-ac51-619e1e42ef16</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -15,6 +15,11 @@ frontend/.env.local
 # placeholder-only .example version is meant to be committed.
 deploy/lightsail/containers.json
 
+# Local backend secrets (e.g. the Bedrock API key) for anyone who'd
+# rather use a project-local file than `dotnet user-secrets`. Only the
+# placeholder-only .example version is meant to be committed.
+backend/src/CriticalViewer.Api/appsettings.Local.json
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

@@ -33,7 +33,7 @@ Originally considered one combined screen (a grid mixing "not yet reviewed" and 
 
 ## AI generation
 
-- **Service: Amazon Bedrock**, model **Amazon Nova Micro** (`amazon.nova-micro-v1:0`). Chosen over Amazon SageMaker (real hourly hosting cost even when idle — a mismatch for a `nano`-tier app) and Amazon Comprehend (that's NLP analysis — sentiment, entities — not text generation, so it can't write a review at all).
+- **Service: Amazon Bedrock**, model **Amazon Nova Micro** (`us.amazon.nova-micro-v1:0`, the inference profile id: in us-east-2 the plain `amazon.nova-micro-v1:0` supports only inference profiles). Chosen over Amazon SageMaker (real hourly hosting cost even when idle — a mismatch for a `nano`-tier app) and Amazon Comprehend (that's NLP analysis — sentiment, entities — not text generation, so it can't write a review at all).
 - Region: **`us-east-2`**, same as the existing Lightsail deployment. Confirmed via `aws bedrock list-foundation-models` that Nova Micro is offered there — no need to call cross-region.
 - Bedrock generates **both** the star rating and the review body text — "fully AI authored," not just body text with a placeholder rating.
 - Prompt inputs are fields the `Movie` entity already has: title, genre, director, tagline, summary. No new data needed to drive generation.

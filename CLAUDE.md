@@ -33,7 +33,10 @@ rating + written review on a movie and see what others said about it.
   decision — see `docs/progress/2026-08-26.md`), managed today via `aws
   lightsail` CLI commands rather than Terraform. The `infra/terraform/`
   layout that previously targeted ECS + RDS was removed since it never
-  matched the real deployment path.
+  matched the real deployment path. Deploy with
+  `tools/deploy/lightsail/lightsail_deploy.py` (`status`, `push`,
+  `deploy --dry-run`, `deploy`, `logs`; see its README) instead of
+  hand-typing the `aws lightsail` commands.
 - GitHub Actions run lint + the unit test suite on every PR for whichever
   of frontend/backend changed (`.github/workflows/`). **A PR cannot be
   approved if either has issues** — this is enforced locally too, see

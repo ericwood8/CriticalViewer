@@ -3,9 +3,9 @@
 ## Stack Summary
 
 - Frontend: React; TypeScript; Vite (SPA, dev-mode server, no production build shipped yet)
-- Backend / API: C#; ASP.NET Core (.NET 10); EF Core
+- Backend / API: C#; ASP.NET Core (.NET 11); EF Core
 - Auth: ASP.NET Core Identity (`AspNetUsers`, GUID keys); JWT bearer tokens
-- Database: MySQL 8.4 (migrated from SQL Server); EF provider `Microting.EntityFrameworkCore.MySql` (community Pomelo fork tracking .NET 10)
+- Database: MySQL 8.4 (migrated from SQL Server); EF provider `Microting.EntityFrameworkCore.MySql` (community Pomelo fork tracking .NET 11)
 - Reverse proxy: nginx (official image); templated config via `envsubst`; single public entry point
 - Containerization: Docker; Docker Compose (local dev — 4 services: `database`, `db_seed`, `backend-api`, `frontend-ui`, `proxy`)
 - CI: GitHub Actions — lint + unit tests per PR, scoped to whichever of frontend/backend changed

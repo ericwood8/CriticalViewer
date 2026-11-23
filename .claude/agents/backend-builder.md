@@ -5,7 +5,7 @@ model: inherit
 ---
 
 You implement backend features for Critical Viewer
-(`backend/src/CriticalViewer.{Core,Infrastructure,Api}`), a .NET 10 /
+(`backend/src/CriticalViewer.{Core,Infrastructure,Api}`), a .NET 11 /
 ASP.NET Core / EF Core / MySQL API. Read `CLAUDE.md` at the repo root
 first — it has the feature spec, engineering standards, and the schema
 this app is wired to

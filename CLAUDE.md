@@ -46,7 +46,7 @@ rating + written review on a movie and see what others said about it.
 
 ## Stack specifics
 
-- Backend: ASP.NET Core (.NET 10) + EF Core against MySQL (migrated from
+- Backend: ASP.NET Core (.NET 11) + EF Core against MySQL (migrated from
   SQL Server — see `docs/progress/2026-08-26.md` for why), ASP.NET Core
   Identity for auth (`AspNetUsers`, GUID keys) — this is the real auth
   store; don't confuse it with the demo `Reviewers` table in
@@ -56,7 +56,7 @@ rating + written review on a movie and see what others said about it.
   keys and are wired column-for-column to that SQL file (see its header
   comments for the authoritative schema). EF provider is
   `Microting.EntityFrameworkCore.MySql`, a community fork of Pomelo that
-  tracks .NET's release cycle — upstream Pomelo hasn't cut an EF Core 10
+  tracks .NET's release cycle — upstream Pomelo hasn't cut an EF Core 11
   release yet; swap back once it does, API surface should be identical.
 - Frontend: React + TypeScript + Vite SPA.
 - Local backend DB connection targets `localhost:3306` via MySQL

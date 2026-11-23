@@ -1,7 +1,7 @@
 # Critical Viewer
 
 Movie review and discovery platform for Critical Viewer LLC. Backend is
-ASP.NET Core (.NET 10) against MySQL; frontend is a React + TypeScript
+ASP.NET Core (.NET 11) against MySQL; frontend is a React + TypeScript
 SPA built on the client's own `index.css` design system.
 
 ## Repo layout
@@ -16,7 +16,7 @@ docs/        Daily progress reports (see docs/progress/README.md)
 
 ## Prerequisites (Windows)
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [.NET 11 SDK](https://dotnet.microsoft.com/download/dotnet/11.0) (the projects target `net11.0`)
 - [Node.js 22 LTS](https://nodejs.org/) (already confirmed installed)
 - MySQL Server (8.4+ recommended) - a local install, or run the
   `database` service from `docker-compose.yml`

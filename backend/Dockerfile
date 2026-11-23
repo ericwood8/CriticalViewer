@@ -2,7 +2,7 @@
 #   docker build -f Dockerfile -t criticalviewer-api .
 # (the GitHub Actions workflow in .github/workflows/backend.yml does this for you)
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 
 COPY src/CriticalViewer.Api/CriticalViewer.Api.csproj src/CriticalViewer.Api/
@@ -13,7 +13,7 @@ RUN dotnet restore src/CriticalViewer.Api/CriticalViewer.Api.csproj
 COPY src/ src/
 RUN dotnet publish src/CriticalViewer.Api/CriticalViewer.Api.csproj -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS final
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080

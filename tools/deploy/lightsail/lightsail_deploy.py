@@ -8,6 +8,7 @@
 
 push:    pushes my-nginx-proxy:local, my-aspnet-api:local and my-react-ui:local (the images docker-compose.yml builds) and prints the
          version Lightsail gave each. --build first runs `docker compose build <service>` for each (build only: no dependent services are started).
+         Stops before building when the lightsailctl plugin (which the AWS CLI needs for the push) is not on PATH, and says how to get it.
 deploy:  checks deploy/lightsail/containers.json, moves each image to the highest pushed version of its label, writes the file back,
          creates the deployment, polls the DEPLOYMENT state (not the service state) until ACTIVE or FAILED, prints the container logs on a
          failure, and on success requests / and /api/health from the public URL. --dry-run prints the plan and the command and changes nothing.
@@ -20,9 +21,12 @@ Options before the command name: --service (default container-service-1), --regi
 """
 import argparse
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -78,6 +82,19 @@ def secrets_of(containers):
                     found.append(value)
                 found += re.findall(r"(?i)(?:password|pwd)\s*=\s*([^;\s]+)", value)
     return sorted(set(found), key=len, reverse=True)
+
+
+def lightsailctl_problem(path_value=None):
+    """None when the lightsailctl plugin that `aws lightsail push-container-image` needs is on PATH, otherwise what to tell the user.
+    A PATH entry that names a lightsailctl folder which no longer exists is the usual cause (the folder was cleaned up, the entry stayed)."""
+    path_value = os.environ.get("PATH", "") if path_value is None else path_value
+    if shutil.which("lightsailctl", path=path_value):
+        return None
+    gone = [folder for folder in path_value.split(os.pathsep) if "lightsailctl" in folder.lower() and not Path(folder).is_dir()]
+    hint = f" PATH names {gone[0]}, but that folder does not exist." if gone else ""
+    return ("the lightsailctl plugin is not on PATH, and `aws lightsail push-container-image` cannot run without it." + hint +
+            " Install it from https://lightsail.aws.amazon.com/ls/docs/en_us/articles/amazon-lightsail-install-software"
+            " (a download of about 10 MB: get the user's approval first), put its folder on PATH, and run `lightsailctl --version`.")
 
 
 def aws(*args):
@@ -187,6 +204,11 @@ def cmd_push(args):
     unknown = [c for c in chosen if c not in CONTAINERS]
     if unknown:
         fail(f"unknown container(s) {', '.join(unknown)}; choose from {', '.join(CONTAINERS)}")
+    problem = lightsailctl_problem()
+    if problem and args.dry_run:
+        print(f"WARNING: {problem}", file=sys.stderr)
+    elif problem:
+        fail(problem)
     for name in chosen:
         label, compose_service = CONTAINERS[name]
         image = f"{label}:local"
@@ -329,6 +351,14 @@ def self_test():
     Settings.secrets = secrets_of(good)
     check("secrets found", sorted(Settings.secrets), ["Hidden99", "Sekret1", "Server=h;Password=Sekret1;"])
     check("redacted", redact("db Password=Other1 and Sekret1 and Hidden99"), "db Password=REDACTED and REDACTED and REDACTED")
+    check("lightsailctl missing", (lightsailctl_problem("") or "").startswith("the lightsailctl plugin is not on PATH"), True)
+    with tempfile.TemporaryDirectory() as empty, tempfile.TemporaryDirectory() as present:
+        gone = str(Path(empty) / "lightsailctl-removed")
+        check("lightsailctl entry that no longer exists is named", f"PATH names {gone}" in (lightsailctl_problem(gone) or ""), True)
+        plugin = Path(present) / ("lightsailctl.exe" if os.name == "nt" else "lightsailctl")
+        plugin.write_text("")
+        plugin.chmod(0o755)
+        check("lightsailctl found", lightsailctl_problem(present), None)
     failed += rollout_scenarios()
     print("all checks passed" if not failed else f"{failed} check(s) failed")
     return 1 if failed else 0

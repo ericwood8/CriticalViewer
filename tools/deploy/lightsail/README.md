@@ -1,6 +1,6 @@
 # Lightsail deploy tool
 
-`lightsail_deploy.py` (Python 3, no packages, needs the AWS CLI) runs the manual deploy path of `docs/technical-brief.md` the same way every time. The config it reads is `deploy/lightsail/containers.json` (real secrets, gitignored) and `deploy/lightsail/public-endpoint.json`.
+`lightsail_deploy.py` (Python 3, no packages, needs the AWS CLI and, for `push`, AWS's `lightsailctl` plugin on PATH) runs the manual deploy path of `docs/technical-brief.md` the same way every time. The config it reads is `deploy/lightsail/containers.json` (real secrets, gitignored) and `deploy/lightsail/public-endpoint.json`. `push` stops before it builds when `lightsailctl` is missing and says how to install it; before a deploy of a framework or package change, run `tools/verify/backend_image_check.py` (see its README).
 
 | Command | What it does |
 |---|---|

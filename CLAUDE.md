@@ -36,7 +36,10 @@ rating + written review on a movie and see what others said about it.
   matched the real deployment path. Deploy with
   `tools/deploy/lightsail/lightsail_deploy.py` (`status`, `push`,
   `deploy --dry-run`, `deploy`, `logs`; see its README) instead of
-  hand-typing the `aws lightsail` commands.
+  hand-typing the `aws lightsail` commands. After a framework, package,
+  Dockerfile or EF change, prove the backend on Linux and in its image
+  with `tools/verify/backend_image_check.py` (`linux-tests`, `smoke`; see
+  its README) before deploying: the unit tests use an in-memory database.
 - GitHub Actions run lint + the unit test suite on every PR for whichever
   of frontend/backend changed (`.github/workflows/`). **A PR cannot be
   approved if either has issues** — this is enforced locally too, see
